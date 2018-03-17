@@ -7,4 +7,4 @@ Usage: ./ruler.p6
 
 Which makes:
 
-![It's a ruler](ruler.png)
+![It's a ruler](image.png)
