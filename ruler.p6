@@ -4,6 +4,7 @@
 # TODO Parameterize text on top of ruler/vs. below
 # TODO Allow for a top and bottom rule
 # TODO Document appropriate SVG sizes for various $SEPARATIONS
+# TODO Optional variable colors for different highlights.
 use v6;
 
 my $HEADER = q:to/END/;
@@ -15,6 +16,7 @@ xmlns="http://www.w3.org/2000/svg">
 END
 my $RULER-RECT = '<rect y="%d" width="%d" height="%d" style="fill:none;stroke-width:1;stroke:%s;stroke-width:3"/>';
 my $NUMBERING = '<text x="%d" y="%d" font-size="%d">%d</text>';
+my $LABELING = '<text x="%d" y="%d" font-size="%d">%s</text>';
 my $VLINE = '<line x1="%d" x2="%d" y1="%d" y2="%d" style="stroke:%s"/>';
 my $END = '</svg>';
 
@@ -29,7 +31,8 @@ my $SEPARATIONS = 16; # 10 for cm, 16 or 32 for inches
 my $TEXT-SPACE = 0; # Allows for room above the SVG for numbers to live
 
 # TODO @HIGHLIGHTS entries can either be numbers, or a pair. If it's a pair, the first entry is where the mark is made, the second is a number/letter below that mark.
-my @HIGHLIGHTS = <11/32 .5 2>; # Say your ruler has "6" inches. A marking at `.5` would create a mark between the first and second major units of measure.
+my @HIGHLIGHTS = <1/2 1.75 41/16 7/2 21/32 15/64 4.5 5.375>; # Say your ruler has "6" inches. A marking at `.5` would create a mark between the first and second major units of measure.
+my @LETTERS = <A B C D E F G H>; # Appears below highlights.
 
 my $RECT-COLOR= 'black';
 my $MARK-COLOR= 'gray';
@@ -43,7 +46,7 @@ my $stroke-height;
 my $stroke-width;
 my $offset;
 
-# MAIN
+# Tick marks & numbering
 my $svg = "";
 $svg ~= sprintf($HEADER, $WIDTH, $HEIGHT);
 loop (my $i = $half-margin;
@@ -67,11 +70,15 @@ loop (my $i = $half-margin;
   }
 }
 
+# Make highlights
 my $x-pos;
-for @HIGHLIGHTS {
-  $x-pos = $_ * $SEPARATIONS * $dx + $half-margin * $dx;
+loop ($i = 0; $i < @HIGHLIGHTS.elems; $i++) {
+  $x-pos = @HIGHLIGHTS[$i] * $SEPARATIONS * $dx + $half-margin * $dx;
   $svg ~= sprintf($VLINE, $x-pos, $x-pos, $TEXT-SPACE, $TEXT-SPACE + $stroke-height, $HIGHLIGHT-COLOR);
+  $svg ~= sprintf($LABELING, $x-pos - ($HEIGHT / 20), (13 * $HEIGHT) / 16, $HEIGHT / 6, @LETTERS[$i]);
 }
+
+# Border
 $svg ~= sprintf($RULER-RECT, $TEXT-SPACE, $WIDTH, $HEIGHT - $TEXT-SPACE, $RECT-COLOR);
 $svg ~= $END;
 say $svg;
